@@ -2,7 +2,7 @@ clc
 clear all
 close all 
 
-addpath('Results', 'helper_functions_2egos')          % i suggest to put all the datas inside a folder called "Results". In this way this script should run without any change.
+addpath('Results', 'helper_functions_3egos')          % i suggest to put all the datas inside a folder called "Results". In this way this script should run without any change.
 
 plot_value_functions = 0;   % change to 1 to plot the value functions of all scenarios
 
@@ -660,3 +660,4 @@ if play_ttc_frame ~= 0
     checkTTC_dyn(ttcs, ev_states, dt, target_time, id_vehicles, simX, time_future)
     plot_frames_ttc(ev_states, target_time, ttcs, id_vehicles, model, simX, dt, time_future)
 end
+
