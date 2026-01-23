@@ -8,17 +8,15 @@ plot_value_functions = 0;   % change to 1 to plot the value functions of all sce
 
 ttc_kin = 1;                % 0 to show dynamic ttc, 1 to show kinematic ttc
 
-plot_ttc_diagrams = 1;      % change to 1 to plot the ttc diagrams of all scenarios 
+plot_ttc_diagrams = 0;      % change to 1 to plot the ttc diagrams of all scenarios 
 
-plot_ttc_statistics = 1;    % change to 1 to plot the mean and std deviation for all scenarios (separetly and all together)
+plot_ttc_statistics = 0;    % change to 1 to plot the mean and std deviation for all scenarios (separetly and all together)
 
 play_scenario = 0;          % change to 1-9 (2 excluded) to play the corresponding scenario's video
 
 play_ttc_frame = 0;         % change to 1-9 (2 excluded) to select the corresponding scenario to check visually the ttc value between two vehicles 
 id_vehicles = [1 0];        % change to 0-3 to select the two vehicles, 1 for ego1, 2 for ego2, 3 for ego3, 0 for hdv
 target_time = 10.6266;      % time of the simulation of which i want to see the ttc configuration and evolution
-
-plot_full_vf = 0;
 
 %Load all results
 res1 = load("Results\scenario1_new.mat");
@@ -45,18 +43,9 @@ res = load("Results\scenario7.mat");
 res7 = res.res;
 results{6} = res7;
 
-% res = load("Results\scenario8.mat");
-% res8 = res.res;
-% results{7} = res8;
-
 res = load("Results\scenario9.mat");
 res9 = res.res;
 results{7} = res9;
-
-V = load("Results\V_ego_scenario1.mat");
-V_ego_full{1} = V.V_save;
-V = load("Results\V_ego_scenario4.mat");
-V_ego_full{2} = V.V_save;
 
 ttc = load("Results\ttc1.mat");
 ttc_standard{1} = ttc.ttcs;
@@ -670,29 +659,4 @@ if play_ttc_frame ~= 0
     [~,ttc] = create_image_ttc2(simX, target_time, dt, id_vehicles, ttcs);
     checkTTC_dyn(ttcs, ev_states, dt, target_time, id_vehicles, simX, time_future)
     plot_frames_ttc(ev_states, target_time, ttcs, id_vehicles, model, simX, dt, time_future)
-end
-
-if plot_full_vf
-    [m, ~] = find(results{1}.brt_activated{1}(:,2) == 0);
-    time_off1 = results{1}.t(m(1)-1);
-    time_on1 = results{1}.t(m(end)+1);
-
-    [m, ind] = find(results{3}.brt_activated{1}(:,2) == 0);
-    time_off4 = results{1}.t(m(1)-1);
-    time_on4 = results{1}.t(m(end)+1);
-
-    figure 
-    plot(results{1}.t, V_ego_full{1}{1})
-    hold on
-    xline(time_off1)
-    hold on
-    xline(time_on1)
-    title('Scenario 1 full value function for vehicle 1')
-    figure 
-    plot(results{3}.t, V_ego_full{2}{1})
-    hold on
-    xline(time_off4)
-    hold on
-    xline(time_on4)
-    title('Scenario 4 full value function for vehicle 1')
 end
