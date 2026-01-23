@@ -3,7 +3,7 @@ close all
 clc
 run("C:\Users\edo\acados\examples\acados_matlab_octave\acados_env_variables_windows.m")
 import casadi.*
-addpath('tracks', 'BRT data', 'build', 'c_generated_code', 'helper_functions_2egos'); % Assicurati che 'helper_functions_2egos' sia ancora appropriato o rinominalo
+addpath('tracks', 'BRT data', 'build', 'c_generated_code', 'helper_functions_3egos'); 
 track_file = 'rettilineo.txt';
 
 %% Simulation parameters and prediction horizon
@@ -24,10 +24,6 @@ ego = cell(1, num_egos);
 % ego{3}.x0 = [125, 2, pi, 0, 6]; 
 % hdv_x0 = [-25, -0.5, 0, 8.5]; 
 
-% ego{1}.x0 = [0, -2, 0, 0, 6];    %scenario 8
-% ego{2}.x0 = [115, 2, pi, 0, 6];
-% ego{3}.x0 = [122, 2, pi, 0, 6]; 
-% hdv_x0 = [-25, -3, 0, 8.5]; 
 
 ego{1}.x0 = [0, -2, 0, 0, 6];    %scenario 9
 ego{2}.x0 = [115, 2, pi, 0, 6];
@@ -158,7 +154,7 @@ for i_solver = 1:num_egos
                    ones(1, 8) * 1e-3, ...  % 8x obs dist
                    1e-5, 1e-3, ...         % 2x overtake
                    0, 0, ...               % Center lane, Lane Keeping  
-                   6000, 300]';            % 2x BRT constraints (ego, hum) 100000
+                   6000, 300]';            % 2x BRT constraints (ego, hum) 
 
     soft_u_lin = [10000, 10000, ...        % 2x lanes
                    ones(1, 8) * 0.01, ...  % 8x obs dist
@@ -171,7 +167,7 @@ for i_solver = 1:num_egos
                    ones(1, 8) * 0, ...      % 8x obs dist
                    0, 0, ...                % 2x overtake, decelerate  questi erano mille
                    0, 0, ...                % Center lane, Lane Keeping  
-                   5, 0]';                  % 2x BRT constraints (ego, hum) 1000
+                   5, 0]';                  % 2x BRT constraints (ego, hum) 
  
     soft_u_quad = [10, 10, ...              % 2x lanes
                    ones(1, 8) * 0, ...      % 8x obs dist
@@ -367,9 +363,9 @@ for i = 1:Nsim
 
 
         if id ~= 4
-            brt_activated{ego_idx}(i,2) = onoff_e*id; % 1*il numero dell'ego se BRT attivo
+            brt_activated{ego_idx}(i,2) = onoff_e*id; 
         else
-            brt_activated{ego_idx}(i,2) = onoff_e; % 1*il numero dell'ego se BRT attivo
+            brt_activated{ego_idx}(i,2) = onoff_e; 
         end
        
         if  (abs(ego{ego_idx}.x0(2)-ego{ego_idx}.x_current(2)) <= 0.5 && onoff_h == 0) 
@@ -451,15 +447,6 @@ toc
 
 %% Plots
 t = linspace(0.0, Nsim * dt, Nsim);
-
-% video_name = 'Scenario3_2_HD.mp4';
-% save_simulation_video_hd(simX, simX_hdv, num_egos, lane_width, dt, video_name);
-
-% scenario_name = 'scenario9';
-% res = save_results(scenario_name, simX, simU, simX_hdv, V_ego_vs_ego, V_ego_vs_human, states_mpc, ...
-%                                                  brt_activated, ham_ego, t, time_ocp, time_tot, model);
-
-ttcs = getTTC(simX, simX_hdv, model, t);
 
 % Settings for video saving
 do_video = false; 
