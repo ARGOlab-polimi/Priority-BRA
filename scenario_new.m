@@ -3,7 +3,7 @@ close all
 clc
 run("C:\Users\edo\acados\examples\acados_matlab_octave\acados_env_variables_windows.m")
 import casadi.*
-addpath('tracks', 'BRT data', 'build', 'c_generated_code', 'helper_functions_2egos'); % Assicurati che 'helper_functions_2egos' sia ancora appropriato o rinominalo
+addpath('tracks', 'BRT data', 'build', 'c_generated_code', 'helper_functions_3egos'); 
 track_file = 'rettilineo.txt';
 
 %% Simulation parameters and prediction horizon
@@ -19,31 +19,31 @@ num_egos = 3;
 ego = cell(1, num_egos);
 
 % %IC
-% ego{1}.x0 = [24, 2, 0, 0, 6];      %scenario 1 prima era 23.5
+% ego{1}.x0 = [24, 2, 0, 0, 6];      %scenario 1 
 % ego{2}.x0 = [22, -2, 0, 0, 6];
 % ego{3}.x0 = [15, -2, 0, 0, 6]; 
 % hdv_x0 = [0, 2, 0, 8];
 % scen = 1;
 
-% ego{1}.x0 = [29.5, 2, 0, 0, 6];      %scenario 4  1 prima era 29
+% ego{1}.x0 = [29.5, 2, 0, 0, 6];      %scenario 4  
 % ego{2}.x0 = [25, -2, 0, 0, 6];
 % ego{3}.x0 = [21, 2, 0, 0, 6]; 
 % hdv_x0 = [0, 2, 0, 8];
 % scen = 4;
 
-% ego{1}.x0 = [24.5, 2, 0, 0, 6];    %scenario 5  1 al centro su
+% ego{1}.x0 = [24.5, 2, 0, 0, 6];    %scenario 5  
 % ego{2}.x0 = [28, -2, 0, 0, 6];
 % ego{3}.x0 = [21, -2, 0, 0, 6]; 
 % hdv_x0 = [0, 2, 0, 8];
 % scen = 5;
 
-% ego{1}.x0 = [21, 2, 0, 0, 6];      %scenario 6 1 su indietro
+% ego{1}.x0 = [21, 2, 0, 0, 6];      %scenario 6 
 % ego{2}.x0 = [29, -2, 0, 0, 6];
 % ego{3}.x0 = [23, -2, 0, 0, 6]; 
 % hdv_x0 = [0, 2, 0, 8];
 % scen = 6;
 
-% ego{1}.x0 = [20, 2, 0, 0, 6];      %scenario 7 1 giu davanti
+% ego{1}.x0 = [20, 2, 0, 0, 6];      %scenario 7 
 % ego{2}.x0 = [27, 2, 0, 0, 6];
 % ego{3}.x0 = [29, -2, 0, 0, 6]; 
 % hdv_x0 = [0, 2, 0, 8];
@@ -109,8 +109,8 @@ for i_solver = 1:num_egos
     
     % Parameters assignment
     model.x0 = ego{i_solver}.x0;
-    model.x_ref(end) = ego{i_solver}.V_ref; % Velocità di riferimento
-    model.x_ref(2) = ego{i_solver}.y_ref;   % Posizione laterale di riferimento
+    model.x_ref(end) = ego{i_solver}.V_ref;
+    model.x_ref(2) = ego{i_solver}.y_ref;   
 
     ocp_model = acados_ocp_model();
     ocp_model.set('name', [model.name '_' num2str(i_solver)]);
@@ -360,9 +360,9 @@ for i = 1:Nsim
         V_ego_vs_ego(i,ego_idx) = V_e;
 
         if ego_obs(id,ego_idx) ~= 4
-            brt_activated{ego_idx}(i,2) = onoff_e*ego_obs(id,ego_idx); % 1*il numero dell'ego se BRT attivo
+            brt_activated{ego_idx}(i,2) = onoff_e*ego_obs(id,ego_idx); 
         else
-            brt_activated{ego_idx}(i,2) = onoff_e; % 1*il numero dell'ego se BRT attivo
+            brt_activated{ego_idx}(i,2) = onoff_e; 
         end
 
         % Determine lane centring constraint parameter
@@ -449,16 +449,6 @@ end
 
 %% Plots 
 t = linspace(0.0, Nsim * dt, Nsim);
-
-% video_name = 'Scenario1_HD.mp4';
-% 
-% save_simulation_video_hd(simX, simX_hdv, num_egos, lane_width, dt, video_name);
-
-% scenario_name = 'scenario4_new';
-% res = save_results(scenario_name, simX, simU, simX_hdv, V_ego_vs_ego, V_ego_vs_human, states_mpc, ...
-%                                                  brt_activated, ham_ego, t, time_ocp, time_tot, model);
-
-ttcs = getTTC(simX, simX_hdv, model, t);
 
 % Settings for video saving
 do_video = false; 
@@ -610,11 +600,9 @@ if do_video
     fprintf('Video salvato correttamente come: %s\n', video_filename);
 end
 hold(ax1, 'off');
-
-% [ttcs_dyn, ev_states_dyn, time_future_dyn] = getTTC_dyn(simX, simX_hdv, model, t);
-% ttc_dyn_data_7.ttcs_dyn = ttcs_dyn;
 % ttc_dyn_data_7.ev_states_dyn = ev_states_dyn;
 % ttc_dyn_data_7.time_future_dyn = time_future_dyn;
 
 % figure
+
 % plot(t, V_save{1})
