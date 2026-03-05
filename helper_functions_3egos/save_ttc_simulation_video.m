@@ -1,5 +1,4 @@
 function save_ttc_simulation_video(simX, simX_hdv, ttcs, id_vehicles, num_egos, lane_width, dt, video_filename)
-% SAVE_TTC_SIMULATION_VIDEO 
 
     fprintf('Inizio rendering video TTC (Real-Time): %s ...\n', video_filename);
 

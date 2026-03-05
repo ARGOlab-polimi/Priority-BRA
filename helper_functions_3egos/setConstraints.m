@@ -137,3 +137,4 @@ ocp_model.set('cost_Zl_0', diag(soft_l_diag2));    %quadratic term
 ocp_model.set('cost_Zu_0', diag(soft_u_diag2));    %quadratic term
 ocp_model.set('cost_Zl', diag(soft_l_diag2));      %quadratic term
 ocp_model.set('cost_Zu', diag(soft_u_diag2));      %quadratic term
+

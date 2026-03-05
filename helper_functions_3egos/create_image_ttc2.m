@@ -1,12 +1,18 @@
 function [handles, ttc] = create_image_ttc2(simX, target_time, dt, id_vehicles, ttcs)
-
+% Configurazione Font per Pubblicazioni
 axis_font_settings = struct(...
-    'FontSize', 14, ...
+    'FontSize', 16, ... % Numeri degli assi (Tick labels)
     'FontName', 'Times New Roman', ...
     'TickLabelInterpreter', 'latex');
 
+% Dimensioni rettangolari per articolo scientifico
+fig_width = 14; 
+fig_height = 7;
+
 Nsim = size(simX{1}, 1);
 t_max = (Nsim - 1) * dt;
+
+% Controllo validità target_time
 if target_time > t_max
     target_time = t_max;
     warning('Target time is beyond simulation duration. Showing the last frame at t=%.2f s.', t_max);
@@ -14,16 +20,20 @@ elseif target_time < 0
     target_time = 0;
     warning('Target time is negative. Showing the first frame at t=0 s.');
 end
+
 frame_idx = round(target_time / dt) + 1; 
 frame_idx = max(1, min(frame_idx, Nsim));
 current_time = (frame_idx - 1) * dt;
 
+% Creazione Figura Rettangolare
 fig_ttc = figure('Name', 'TTC Time Series', ...
-                 'Units', 'centimeters');
+                 'Units', 'centimeters', ...
+                 'Position', [5, 5, fig_width, fig_height]); 
 ax_ttc = axes('Parent', fig_ttc);
 set(ax_ttc, axis_font_settings);
 hold(ax_ttc, 'on');
 
+% Selezione dati in base agli ID veicoli
 ids_sorted = sort(id_vehicles); 
 if isequal(ids_sorted, [1 2])
     col_idx = 1; plot_title = 'TTC between Ego 1 \& Ego 2';
@@ -45,34 +55,40 @@ end
 t_vec = (0:Nsim-1)' * dt; 
 data_to_plot = ttcs(:, col_idx);
 
+% Plot della serie storica (punti)
 plot(ax_ttc, t_vec, data_to_plot, '.', 'MarkerSize', 10, ...
      'MarkerEdgeColor', [0 0.4470 0.7410], ...
      'DisplayName', 'TTC History');
 
+% Highlight del valore al tempo target
 current_value = data_to_plot(frame_idx);
 plot(ax_ttc, current_time, current_value, 'ro', 'MarkerFaceColor', 'r', ...
-     'MarkerSize', 10, 'HandleVisibility', 'off');
+     'MarkerSize', 8, 'HandleVisibility', 'off');
 
+% Annotazione testo TTC (font 12pt per non sovraffollare il grafico)
 text_str = sprintf('TTC = %.2f s', current_value);
 text_offset = 0.02 * t_max; 
 text(ax_ttc, current_time + text_offset, current_value, text_str, ...
      'HorizontalAlignment', 'left', ...
      'VerticalAlignment', 'bottom', ...
-     'FontSize', 14, 'FontWeight', 'bold', 'Interpreter', 'latex');
+     'FontSize', 16, 'FontWeight', 'bold', 'Interpreter', 'latex');
 
-xlabel(ax_ttc, 'Simulation time $t$ [s]', 'Interpreter', 'latex', 'FontSize', 16);
+% Label Assi Ingrandite
+xlabel(ax_ttc, '$t$ [s]', 'Interpreter', 'latex', 'FontSize', 16);
 ylabel(ax_ttc, 'TTC [s]', 'Interpreter', 'latex', 'FontSize', 16);
-% title(ax_ttc, plot_title, 'Interpreter', 'latex', 'FontSize', 16);
+
 grid(ax_ttc, 'on');
 box(ax_ttc, 'on');
-% axis equal
+
+% Limiti assi: Y parte da 0
 xlim(ax_ttc, [0 t_max]);
 ylim(ax_ttc, [0 10]); 
 
 hold(ax_ttc, 'off');
 
+% Output handles
 handles.fig_ttc = fig_ttc;
 handles.ax_ttc = ax_ttc;
-
 ttc = current_value;
+
 end

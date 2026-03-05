@@ -25,22 +25,45 @@ frame_idx = max(1, min(frame_idx, Nsim));
 
 
 % Initial states extraction
-s1_0 = simX{1}(frame_idx, 1); y1_0 = simX{1}(frame_idx, 2); theta1 = simX{1}(frame_idx, 3); v1 = simX{1}(frame_idx, 5);
-s2_0 = simX{2}(frame_idx, 1); y2_0 = simX{2}(frame_idx, 2); theta2 = simX{2}(frame_idx, 3); v2 = simX{2}(frame_idx, 5);
-s3_0 = simX{3}(frame_idx, 1); y3_0 = simX{3}(frame_idx, 2); theta3 = simX{3}(frame_idx, 3); v3 = simX{3}(frame_idx, 5);
-sh_0 = simX_hdv(frame_idx, 1); yh_0 = simX_hdv(frame_idx, 2); thetah = simX_hdv(frame_idx, 3); vh = simX_hdv(frame_idx, 4);
+s1_0 = simX{1}(frame_idx, 1); 
+y1_0 = simX{1}(frame_idx, 2); 
+theta1 = simX{1}(frame_idx, 3); 
+v1 = simX{1}(frame_idx, 5);
+
+s2_0 = simX{2}(frame_idx, 1); 
+y2_0 = simX{2}(frame_idx, 2); 
+theta2 = simX{2}(frame_idx, 3); 
+v2 = simX{2}(frame_idx, 5);
+
+s3_0 = simX{3}(frame_idx, 1); 
+y3_0 = simX{3}(frame_idx, 2); 
+theta3 = simX{3}(frame_idx, 3); 
+v3 = simX{3}(frame_idx, 5);
+
+sh_0 = simX_hdv(frame_idx, 1); 
+yh_0 = simX_hdv(frame_idx, 2); 
+thetah = simX_hdv(frame_idx, 3); 
+vh = simX_hdv(frame_idx, 4);
 
 % States propagation
-x1_end = s1_0 + v1 * cos(theta1) * ttc; y1_end = y1_0 + v1 * sin(theta1) * ttc;
-x2_end = s2_0 + v2 * cos(theta2) * ttc; y2_end = y2_0 + v2 * sin(theta2) * ttc;
-x3_end = s3_0 + v3 * cos(theta3) * ttc; y3_end = y3_0 + v3 * sin(theta3) * ttc;
-xh_end = sh_0 + vh * cos(thetah) * ttc; yh_end = yh_0 + vh * sin(thetah) * ttc;
+x1_end = s1_0 + v1 * cos(theta1) * ttc; 
+y1_end = y1_0 + v1 * sin(theta1) * ttc;
+x2_end = s2_0 + v2 * cos(theta2) * ttc; 
+y2_end = y2_0 + v2 * sin(theta2) * ttc;
+x3_end = s3_0 + v3 * cos(theta3) * ttc; 
+y3_end = y3_0 + v3 * sin(theta3) * ttc;
+xh_end = sh_0 + vh * cos(thetah) * ttc; 
+yh_end = yh_0 + vh * sin(thetah) * ttc;
 
 % Trajectories creation
-x1_series = [s1_0, x1_end]; y1_series = [y1_0, y1_end];
-x2_series = [s2_0, x2_end]; y2_series = [y2_0, y2_end];
-x3_series = [s3_0, x3_end]; y3_series = [y3_0, y3_end];
-xh_series = [sh_0, xh_end]; yh_series = [yh_0, yh_end];
+x1_series = [s1_0, x1_end]; 
+y1_series = [y1_0, y1_end];
+x2_series = [s2_0, x2_end]; 
+y2_series = [y2_0, y2_end];
+x3_series = [s3_0, x3_end]; 
+y3_series = [y3_0, y3_end];
+xh_series = [sh_0, xh_end]; 
+yh_series = [yh_0, yh_end];
 
 % Plot settings
 fig = figure('Name', sprintf('Predicted Configuration at TTC = %.2f s', ttc), ...

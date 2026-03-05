@@ -1,4 +1,4 @@
-function fig = plot_frames_ttc(ev_states, target_time, ttcs, id_vehicle, simX, simX_hdv, time_future)
+function fig = plot_kinematic_ttc_frames(simX, simX_hum, ttcs, id_vehicle, target_time)
     dt = 0.05;
     
     axis_font_settings = struct(...
@@ -11,7 +11,7 @@ function fig = plot_frames_ttc(ev_states, target_time, ttcs, id_vehicle, simX, s
     
     if target_time > t_max
         target_time = t_max;
-        warning('Target time oltre durata sim. Uso t=%.2f s.', t_max);
+        warning('Target time oltre la durata della simulazione. Uso t=%.2f s.', t_max);
     elseif target_time < 0
         target_time = 0;
         warning('Target time negativo. Uso t=0 s.');
@@ -27,37 +27,30 @@ function fig = plot_frames_ttc(ev_states, target_time, ttcs, id_vehicle, simX, s
     elseif isequal(ids_sorted, [0 1]), ttc_val = ttcs(frame_idx, 4);
     elseif isequal(ids_sorted, [0 2]), ttc_val = ttcs(frame_idx, 5);
     elseif isequal(ids_sorted, [0 3]), ttc_val = ttcs(frame_idx, 6);
-    else, ttc_val = 0; warning('ID combinazione non valida'); end
+    else, ttc_val = 0; error('Combinazione ID non valida'); end
     
-    if ttc_val > 20
-        ttc_val = 3;
+    if isinf(ttc_val) || ttc_val < 0
+        ttc_val = 4.0;
     end
     
-    dt_future = time_future(2) - time_future(1);
-    if dt_future <= 0, dt_future = 0.1; end 
-    
-    idx_end = round(ttc_val / dt_future); 
-    max_future_frames = size(ev_states.ev_states1, 2);
-    idx_end = max(1, min(idx_end, max_future_frames)); 
-    
-    t_end = idx_end * dt_future;
-    t_raw = linspace(0, t_end, 5);
-    
-    % Arrotonda solo i tempi target ai multipli di 0.05
+    t_raw = linspace(0, ttc_val, 5);
     t_target = t_raw;
     if length(t_target) >= 3
         t_target(2:end-1) = round(t_raw(2:end-1) / 0.05) * 0.05;
     end
+    t_eval = unique(t_target);
     
-    % Mappa gli indici più vicini e rendili unici
-    pred_indices = round(t_target / dt_future);
-    pred_indices = unique(max(0, min(idx_end, pred_indices)));
-    num_steps = length(pred_indices);
+    [stateA, dimsA] = get_kinematic_state(id_vehicle(1), simX, simX_hum, frame_idx);
+    [stateB, dimsB] = get_kinematic_state(id_vehicle(2), simX, simX_hum, frame_idx);
     
-    [states_A_all, dims_A] = get_vehicle_data(id_vehicle(1), ev_states);
-    [states_B_all, dims_B] = get_vehicle_data(id_vehicle(2), ev_states);
+    get_x = @(state, t) state(1) + state(4) * cos(state(3)) * t;
+    get_y = @(state, t) tan(state(3)) * (get_x(state, t) - state(1)) + state(2);
     
-    fig = figure('Name', sprintf('Shape Evolution ID %d vs %d', id_vehicle(1), id_vehicle(2)));
+    [x_poly_rel, y_poly_rel] = shapePolygonLevelRobust(dimsA, dimsB, stateA(3), stateB(3));
+    x_poly_rel = [x_poly_rel(:); x_poly_rel(1)];
+    y_poly_rel = [y_poly_rel(:); y_poly_rel(1)];
+    
+    fig = figure('Name', sprintf('Kinematic Shape Evolution ID %d vs %d', id_vehicle(1), id_vehicle(2)));
     ax = axes('Parent', fig);
     set(ax, axis_font_settings);
     hold(ax, 'on');
@@ -65,47 +58,37 @@ function fig = plot_frames_ttc(ev_states, target_time, ttcs, id_vehicle, simX, s
     box(ax, 'on');
     grid(ax, 'on');
     
+    num_steps = length(t_eval);
     alphas = linspace(0.4, 1.0, num_steps);
     color_A = get_v_color_rgb(id_vehicle(1));
     color_B = get_v_color_rgb(id_vehicle(2));
-              
+    
     min_x = inf; max_x = -inf;
     min_y = inf; max_y = -inf;
     
     for k = 1:num_steps
-        pidx = pred_indices(k);
+        delta_t = t_eval(k);
         
-        % Gestione nomi in legenda puliti
         if k == 1
             disp_name = '+0.00 s';
         elseif k == num_steps
-            disp_name = sprintf('+%.2f s', pidx * dt_future);
+            disp_name = sprintf('+%.2f s', delta_t);
         else
-            % Forza il display a mostrare multipli perfetti di 0.05
-            delta_t_disp = round((pidx * dt_future) / 0.05) * 0.05;
+            delta_t_disp = round(delta_t / 0.05) * 0.05;
             disp_name = sprintf('+%.2f s', delta_t_disp);
         end
         
-        if pidx == 0
-            state_A_0 = get_current_state(id_vehicle(1), simX, simX_hdv, frame_idx);
-            state_B_0 = get_current_state(id_vehicle(2), simX, simX_hdv, frame_idx);
-            xA = state_A_0(1); yA = state_A_0(2); thetaA = state_A_0(3);
-            xB = state_B_0(1); yB = state_B_0(2); thetaB = state_B_0(3);
-        else
-            sA = states_A_all(:, pidx, frame_idx); 
-            sB = states_B_all(:, pidx, frame_idx);
-            xA = sA(1); yA = sA(2); thetaA = sA(3);
-            xB = sB(1); yB = sB(2); thetaB = sB(3);
-        end
+        xA = get_x(stateA, delta_t);
+        yA = get_y(stateA, delta_t);
         
-        [x_poly_rel, y_poly_rel] = shapePolygonLevelRobust(dims_A, dims_B, thetaA, thetaB);
+        xB = get_x(stateB, delta_t);
+        yB = get_y(stateB, delta_t);
+        
         x_poly = x_poly_rel + xA;
         y_poly = y_poly_rel + yA;
-        x_poly = [x_poly; x_poly(1)];
-        y_poly = [y_poly; y_poly(1)];
         
         lw = 1.2;
-        if k == num_steps, lw = 2.0; end 
+        if k == num_steps, lw = 2.0; end
         
         plot(ax, x_poly, y_poly, 'LineStyle', '-', 'Color', [color_A, alphas(k)], ...
              'LineWidth', lw, 'DisplayName', disp_name);
@@ -146,23 +129,21 @@ function fig = plot_frames_ttc(ev_states, target_time, ttcs, id_vehicle, simX, s
     hold(ax, 'off');
 end
 
-function [states, dims] = get_vehicle_data(id, ev_states)
+function [state, dims] = get_kinematic_state(id, simX, simX_hum, idx)
     dims = [4.3, 1.8];
-    switch id
-        case 1, states = ev_states.ev_states1;
-        case 2, states = ev_states.ev_states2;
-        case 3, states = ev_states.ev_states3;
-        case 0, states = ev_states.ev_statesh;
-        otherwise, error('ID %d non valido', id);
-    end
-end
-
-function state = get_current_state(id, simX, simX_hdv, idx)
+    
     if id == 0
-        state = simX_hdv(idx, 1:3);
+        x0 = simX_hum(idx, 1);
+        y0 = simX_hum(idx, 2);
+        th = simX_hum(idx, 3);
+        v  = simX_hum(idx, 4);
     else
-        state = simX{id}(idx, 1:3);
+        x0 = simX{id}(idx, 1);
+        y0 = simX{id}(idx, 2);
+        th = simX{id}(idx, 3);
+        v  = simX{id}(idx, 5);
     end
+    state = [x0, y0, th, v];
 end
 
 function c = get_v_color_rgb(id)
